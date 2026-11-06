@@ -1,0 +1,24 @@
+name: topmodel
+version: 1.0.0
+description: Skill agent pour modéliser données et API avec TopModel (fichiers .tmd, modgen, diagnostics LSP)
+author: Klee Group
+license: MIT
+repository: https://github.com/klee-contrib/topmodel
+keywords:
+  - topmodel
+  - modgen
+  - tmd
+  - code-generation
+  - modeling
+dependencies:
+  apm: []
+  mcp: []
+  lsp:
+    - name: modls
+      command: modls
+      args: []
+      extensionToLanguage:
+        ".tmd": topmodel
+      startupTimeout: 60000
+includes: auto
+scripts: {}
