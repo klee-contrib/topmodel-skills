@@ -1,5 +1,5 @@
 name: topmodel
-version: 1.0.0
+version: 1.1.0
 description: Skill agent pour modéliser données et API avec TopModel (fichiers .tmd, modgen, diagnostics LSP)
 author: Klee Group
 license: MIT
