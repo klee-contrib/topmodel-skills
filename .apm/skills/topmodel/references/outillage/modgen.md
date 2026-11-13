@@ -16,16 +16,16 @@ Quel outil voit quelle erreur (`modgen` ou `modls`) : [`modls.md`](modls.md) § 
 
 ## Mode watch (sur accord explicite de l'humain)
 
-Boucle plus rapide que la copie temporaire : le modèle n'est chargé qu'une fois, chaque enregistrement de `.tmd` régénère en ~1-2 s. **Contrepartie : chaque version valide régénère le code et le lock dans le dépôt** — n'utiliser ce mode qu'avec l'accord de l'humain pour la session (l'agent peut le proposer, ci-dessous).
+Boucle plus rapide qu'un `modgen` lancé après chaque édition : le modèle n'est chargé qu'une fois, chaque enregistrement de `.tmd` régénère en ~1-2 s. **Contrepartie : chaque version valide régénère le code et le lock dans le dépôt** — n'utiliser ce mode qu'avec l'accord de l'humain pour la session (l'agent peut le proposer, ci-dessous).
 
-**En début de travail sur le modèle, choisir le mode avec l'humain** : si `git status` ne montre aucune modification en cours dans le modèle ni dans le code généré, **lui proposer** le mode watch dans le dépôt (le code généré reste lisible dans l'IDE et réversible par `git restore` / `git clean`). Sinon, rester sur la copie temporaire.
+**En début de travail sur le modèle, choisir le mode avec l'humain** : si `git status` ne montre aucune modification en cours dans le modèle ni dans le code généré, **lui proposer** le mode watch dans le dépôt (le code généré reste lisible dans l'IDE et réversible par `git restore` / `git clean`). Sinon, générer ponctuellement (boucle de [`SKILL.md`](../../SKILL.md)).
 
 - Un seul watcher à la fois : vérifier qu'aucun `modgen` ne tourne déjà (Windows : `tasklist | grep -i modgen`, ligne de commande via `Get-CimInstance Win32_Process -Filter "Name='modgen.exe'"`) ; sinon, demander à l'humain de l'arrêter.
 - Le lancer en tâche de fond, sortie redirigée vers un fichier temporaire : `modgen -f <config> -w > <tmp>/modgen-watch.log 2>&1`
 - Après chaque édition, lire **uniquement les nouvelles lignes** du log (noter `wc -l` avant), attendre `Mise à jour terminée` (succès) ou un code `{TMDxxxx}` / un dump `oneOf` (modèle invalide, aucun code généré n'est écrit). En watch, les `.tmd` modifiés apparaissent aussi en `Créé:` / `Modifié:` / `Supprimé:` / `Renommé:` : ne pas les confondre avec des fichiers générés.
 - Une modification de la configuration est prise en compte à chaud (le worker redémarre et recharge tout).
-- Les diagnostics IDE remontés après un `Edit` sont un signal gratuit mais parfois décalés : alerte, pas preuve.
-- **Avant de rendre la main**, la validation sur copie temporaire (étape 2 de la boucle de [`SKILL.md`](../../SKILL.md)) reste obligatoire.
+- Les diagnostics IDE remontés après une édition sont un signal gratuit mais parfois décalés : alerte, pas preuve.
+- **Avant de rendre la main**, vérifier dans le log que la dernière génération est un succès et que ses fichiers correspondent à l'attendu ([`SKILL.md`](../../SKILL.md) § Lire le résultat de la génération).
 
 ## Version de `modgen`
 

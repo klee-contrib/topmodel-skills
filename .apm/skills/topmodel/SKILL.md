@@ -18,51 +18,55 @@ Le modèle (`*.tmd`, en YAML) est la source de vérité. `modgen` en génère le
 
 ## Boucle de travail obligatoire
 
-1. Éditer le `.tmd`
-2. **Vérification qui fait autorité** — sur copie temporaire (recette ci-dessous)
-3. Corriger, relancer, jusqu'à ce que ce soit propre
-4. Génération réelle `modgen -f <config>`, lancée et annoncée par l'agent — **seulement une fois les étapes 2 et 3 propres** (inutile en mode watch)
+Avant de commencer, noter le `git status` du modèle et du code généré : la génération écrit dans le dépôt, un arbre propre permet d'isoler ses effets et de les annuler (`git restore` / `git clean`). Si des fichiers générés ont déjà des modifications en cours, le signaler à l'humain avant de générer.
+
+1. Éditer le `.tmd` **uniquement avec l'outil d'édition de fichiers de l'agent**, jamais via le terminal (heredoc, `sed`, `cp`…) : un fichier écrit hors de cet outil n'est pas signalé au language server `modls`, qui ne renvoie alors aucun diagnostic
+2. Si des diagnostics `modls` (codes `TMDxxxx`) sont remontés après l'écriture, les corriger avant de générer
+3. **Générer** : `modgen -f <config>`, lancé et annoncé par l'agent (inutile en mode watch)
+4. **Vérifier que le résultat est conforme à l'attendu** (ci-dessous) ; sinon corriger le `.tmd` et relancer
 5. Traiter la glu (ci-dessous), sinon le build casse
 
-- **Mode watch** : écrit dans le dépôt ; à proposer si l'arbre est propre, jamais sans accord de l'humain ([`references/outillage/modgen.md`](references/outillage/modgen.md)).
+- **Mode watch** : à proposer si l'arbre est propre, jamais sans accord de l'humain ([`references/outillage/modgen.md`](references/outillage/modgen.md)).
 - **« Ce modèle a été généré pour la dernière fois avec… »** (avertissement), éventuellement suivi d'une `FileNotFoundException` ou d'une erreur « Le module … référence une version … » : version de `modgen` différente du lock, pas une erreur de modèle ([`references/outillage/modgen.md`](references/outillage/modgen.md) § Version de `modgen`).
 
-### ⚠️ `modgen --check` n'est PAS en lecture seule
+### Lire le résultat de la génération
 
-Il sert à vérifier, en CI/CD, que le code généré est à jour par rapport au modèle. Concrètement :
+- erreurs `TMDxxxx` ou dump `oneOf` → modèle invalide, aucun code généré n'est écrit : corriger le `.tmd` et relancer ([`references/outillage/modgen.md`](references/outillage/modgen.md) § Décoder les erreurs) ;
+- `Mise à jour terminée avec succès.` → relire les `Créé:` / `Modifié:` / `Supprimé:` : chaque fichier doit découler du `.tmd` modifié (une classe → son entité ou DTO, ses mappers ; un endpoint → son contrôleur ou client ; des libellés → les ressources). Cette liste suffit : n'ouvrir un fichier généré que s'il est inattendu (classe non touchée modifiée, suppression), avec `git diff` sur ce fichier ;
+- `Modifié: …topmodel.lock` : attendu quand la liste des fichiers générés change ; un changement de `version:` est à annuler ou signaler.
 
-1. avant tout, il réécrit le lock (`version:` = celle de l'outil installé) et son cache `.modgen/` ;
-2. il charge et valide le modèle — invalide : exit 1, **aucun code généré n'est écrit** ;
-3. valide : **il régénère tout le code** (et supprime les fichiers générés qui ne le sont plus), puis sort en 1 si un fichier a été créé, modifié ou supprimé — lock compris —, 0 sinon.
+**LSP silencieux ne veut pas dire valide** : `modls` ne publie aucun diagnostic pour les erreurs de schéma ([`references/outillage/modls.md`](references/outillage/modls.md) § Qui attrape quoi), c'est `modgen` qui fait autorité. Le serveur démarre au premier `.tmd` écrit de la session et met ~5 s à répondre : le premier diagnostic peut arriver avec un léger décalage.
 
-Ne jamais le lancer dans le dépôt pour « juste valider » : utiliser la copie temporaire.
-Ne lancer que pour vérifier que le code généré n'a pas été modifié, seulement à la fin d'un travail hors fichiers tmd. Le relancer après un changement de `.tmd` est inutile : le code généré est forcément modifié, et le lock aussi.
+### `modgen --check` est réservé à la CI
 
-### Recette de validation sans écrire dans le dépôt
+Il vérifie que le code généré est à jour par rapport au modèle (pipelines CI/CD) : ce n'est **pas** un outil de validation d'un modèle en cours d'édition. Il n'est pas en lecture seule : il réécrit le lock et son cache `.modgen/`, puis régénère tout le code et sort en 1 si un fichier a changé. Après une modification de `.tmd`, il échoue forcément : utiliser `modgen -f <config>`.
 
-Copier la config, le lock, le modèle **et les dossiers de sortie** (`outputDirectory` de chaque générateur de la config, relatif à la config, souvent en `../…`), en conservant leurs positions relatives : sans le code généré existant, tout sort « Créé » et le code de retour ne dit plus rien.
+## Respecter l'existant
 
-```bash
-TMP=$(mktemp -d)   # ou un dossier ignoré du dépôt si l'environnement interdit d'écrire ailleurs
-cp -r <dossier du modèle> <dossiers de sortie de la config> "$TMP/"   # ex. model sources env
-cd "$TMP/<dossier du modèle>" && modgen -f <config> --check; echo "exit=$?"
-```
+- **Un DTO par usage** : chaque usage (création, mise à jour, liste, détail…) a son propre DTO, même si un DTO proche existe déjà ailleurs dans le modèle. Si plusieurs DTO partagent réellement un socle et que le contexte le justifie, factoriser par héritage (`extends`, [`references/syntaxe/classe.md`](references/syntaxe/classe.md)), jamais en réutilisant le DTO d'un autre usage.
+- **Nommer selon la convention du projet** : la relever sur les classes et fichiers existants de même rôle, et l'appliquer à l'identique — même racine (le nom **exact** de la classe source, sans le passer au singulier ni au pluriel : `Profils` → `ProfilsCreation`, jamais `ProfilCreation`), mêmes suffixes de rôle, même langue, même nommage des fichiers `.tmd`. Si le nom obtenu est déjà pris dans le module, changer le **suffixe** (de préférence un suffixe déjà employé dans le projet), jamais la racine, et **sans demander** : deux classes de même nom dans un module ne sont pas forcément signalées, et la seconde écrase le code généré de la première.
+- **Ne pas déplacer, renommer, supprimer ni modifier une classe ou un fichier existant** pour l'adapter à la tâche : créer à côté. Ne demander à l'humain que si la tâche ne peut pas être faite sans modifier l'existant ; sinon, choisir l'option qui ne le touche pas et poursuivre.
+- **Ne pas modifier une classe persistée existante** (propriétés, `required`, domaines…) si la tâche ne le demande pas : migration de base, API cassante.
 
-Lecture du résultat :
+### Erreurs les plus fréquentes
 
-- erreurs `TMDxxxx` ou dump `oneOf`, exit 1 → modèle invalide, aucun code généré n'est écrit ;
-- `Mise à jour terminée avec succès.` puis exit 1 → modèle valide, des fichiers changent (attendu après une modification du `.tmd`) : relire les `Créé:` / `Modifié:` / `Supprimé:` pour vérifier que seuls les fichiers attendus bougent (un `Modifié: …topmodel.lock` seul = simple changement de version de l'outil) ;
-- exit 0 → modèle valide et code généré déjà à jour.
+- Paramètre de route d'un alias de clé primaire : `{<trigramme, sinon classe en camelCase><Propriété>}` — `Profils.Id` sans trigramme → `{profilsId}`, pas `{profilId}` (sinon `TMD7005`).
+- Toute classe citée (alias, composition, association, `returns`) doit être visible via `uses:` (sinon `TMD0002`) ; un `uses:` inutilisé déclenche `TMD1003`.
 
-Diagnostics complets (schéma **et** sémantique), avec position ; le code généré atterrit dans `$TMP`. **LSP silencieux ne veut pas dire valide** : il ne publie aucun diagnostic pour les erreurs de schéma ([`references/outillage/modls.md`](references/outillage/modls.md) § Qui attrape quoi).
+## Quand lire les références
 
-## Lire la référence AVANT d'écrire
+**Le projet fait référence.** Si un `.tmd` existant du projet contient déjà la même construction (entité, DTO, endpoint, mapper, annotation…), la reproduire en l'adaptant, **sans ouvrir `references/`**. Ne pas inventer de clé absente des `.tmd` du projet : les variantes de propriétés ont des listes de clés **fermées**.
 
-Ne pas écrire de `.tmd` de mémoire : les variantes de propriétés ont des listes de clés **fermées**.
+N'ouvrir une référence que dans deux cas :
 
-| Ce que tu écris ou cherches | À lire d'abord |
+- la construction n'existe nulle part dans le projet ;
+- une erreur `TMDxxxx` ou un dump `oneOf` que tu ne sais pas corriger : ouvrir alors le fichier qui traite de cette erreur, pas les autres.
+
+**Budget : au plus 2 fichiers de `references/` par tâche, un seul par question.** Écrire d'abord, générer, et laisser les erreurs dire quoi lire. Ne pas lire `references/generateurs/` pour vérifier une génération réussie : § Lire le résultat de la génération suffit.
+
+| Si tu en as besoin (cas ci-dessus) | Lire un seul fichier |
 | --- | --- |
-| n'importe quoi de non trivial | les `.tmd` existants du projet (prioritaires : ils portent les conventions locales), puis [`references/exemples.md`](references/exemples.md) |
+| une construction absente du projet | [`references/exemples.md`](references/exemples.md) (index), puis l'exemple correspondant |
 | une classe, une propriété (`association`, `alias`, `composition`), un domaine, un endpoint, une annotation | [`references/syntaxe.md`](references/syntaxe.md) (index) → un seul fichier : [fichier et types de documents](references/syntaxe/fichier.md), [classe](references/syntaxe/classe.md), [propriétés](references/syntaxe/proprietes.md) ou [annotations](references/syntaxe/annotations.md) |
 | ce que le générateur fait de ces clés : persistée ou DTO, `reference: true`, noms générés, mappers, paramètres d'endpoint, `uses:` et cycles | [`references/regles.md`](references/regles.md) (index) → un seul fichier : [classes](references/regles/classes.md), [associations et alias](references/regles/associations-alias.md), [mappers](references/regles/mappers.md), [endpoints](references/regles/endpoints.md), [annotations et décorateurs](references/regles/annotations-decorateurs.md), [`uses:` et tags](references/regles/fichiers-uses.md) |
 | ce qu'un générateur donné (C#, Java, front) produit concrètement : noms, emplacements, types | [`references/generateurs.md`](references/generateurs.md) (index) → un seul fichier : [C#](references/generateurs/csharp.md), [Java](references/generateurs/java.md) ou [front](references/generateurs/front.md), selon le générateur de la configuration |
@@ -93,13 +97,17 @@ Ne pas écrire de `.tmd` de mémoire : les variantes de propriétés ont des lis
 - `reference: true` justifié pour chaque classe qui le porte ; aucun groupe d'alias préfixés répété ;
 - les fichiers générés ne changent que par l'effet du `.tmd` modifié ; un changement de version dans le lock est annulé ou signalé ;
 - toute modification d'un objet existant (renommage, domaine, suppression) est listée à l'humain avec ses impacts : migration, API cassante, front ;
-- la validation sur copie temporaire a été relancée en dernier et est propre.
+- la génération a été relancée en dernier, sans erreur, et ses `Créé:` / `Modifié:` / `Supprimé:` correspondent à l'attendu.
 
 ## Red flags — arrêter et reprendre
 
 - Tu t'apprêtes à éditer un fichier listé dans le lock → édite le `.tmd` (ou un point d'extension)
-- Tu as écrit du `.tmd` sans le valider → `modgen` **sur copie temporaire**
-- Tu t'apprêtes à lancer `modgen` (même `--check`) dans le dépôt pour valider → il écrira le code généré
+- Tu as écrit du `.tmd` sans générer → `modgen -f <config>` et lire le résultat
+- Tu t'apprêtes à déplacer, modifier ou supprimer une classe existante pour la réutiliser → un DTO dédié à l'usage, nommé selon la convention du projet (héritage si le contexte le justifie)
+- Tu t'arrêtes pour demander alors qu'une option ne touchant pas l'existant permet de finir (autre nom, DTO dédié) → la prendre et poursuivre
+- Tu modifies une classe persistée existante alors que la tâche ne le demande pas → arrêter et demander à l'humain
+- Tu t'apprêtes à écrire un `.tmd` depuis le terminal (heredoc, `sed`, `cat >`) → outil d'édition de fichiers de l'agent, sinon aucun diagnostic `modls`
+- Tu t'apprêtes à lancer `modgen --check` pour valider un modèle en cours d'édition, ou à générer dans une copie temporaire → `modgen -f <config>` dans le dépôt, `--check` est réservé à la CI
 - Tu répètes les mêmes alias avec `prefix: A` puis `prefix: B` → une classe DTO et deux `composition`
 - Tu poses `reference: true` sur une entité volumineuse ou importée → lecture par des queries, pas liste de référence
 - Tu écris `annotations:` sous l'implémentation de langage d'un domaine (`csharp:`, `java:`…) → syntaxe obsolète ([`references/syntaxe/annotations.md`](references/syntaxe/annotations.md))

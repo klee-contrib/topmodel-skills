@@ -25,14 +25,14 @@ Le language server a son **propre** numéro de version, absent du lock : même v
 
 ## Qui attrape quoi
 
-| Classe d'erreur | LSP (`modls`) | `modgen` sur copie |
+| Classe d'erreur | LSP (`modls`) | `modgen` |
 | --- | --- | --- |
 | Schéma : clé interdite, document mal formé | ❌ **aucun diagnostic** (dump seulement dans le journal du serveur ; il garde l'état précédent du fichier) | ✅ dump `oneOf` |
 | Sémantique : `TMD0002` classe introuvable (`uses:` manquant), `TMD0003` domaine, `TMD0004` propriété, `TMD3005` rôle requis | ✅ | ✅ |
 | Import inutilisé (`TMD1003`) | ✅ (warning) | ✅ |
 | Écrit sur le disque | non | oui (code généré, lock, `.modgen/`) |
 
-**LSP silencieux ne veut pas dire valide.** La validation `modgen` sur copie reste l'autorité. Décodage des messages : [`modgen.md`](modgen.md) § Décoder les erreurs.
+**LSP silencieux ne veut pas dire valide.** `modgen` reste l'autorité. Décodage des messages : [`modgen.md`](modgen.md) § Décoder les erreurs.
 
 ## Requêtes spécifiques de `modls`
 
