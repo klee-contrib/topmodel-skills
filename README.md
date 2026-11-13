@@ -4,8 +4,30 @@ Package APM fournissant un skill agent pour écrire un modèle [TopModel](https:
 
 ## Installation
 
+De manière ensembliste (recommandé) :
+
+```bash
+apm install klee-contrib/topmodel-skills --global
+```
+
+Au sein d'un projet :
+
 ```bash
 apm install klee-contrib/topmodel-skills
+```
+
+## Mise à jour
+
+De manière ensembliste (recommandé) :
+
+```bash
+apm update klee-contrib/topmodel-skills --global
+```
+
+Au sein d'un projet :
+
+```bash
+apm update klee-contrib/topmodel-skills
 ```
 
 ## Contenu
