@@ -10,7 +10,3 @@ Référence de [`SKILL.md`](../../SKILL.md). Clés d'un endpoint : [`syntaxe/fic
 - Alias de PK en paramètre : nom préfixé par le trigramme (de la propriété, sinon de sa classe), sinon par le nom de la classe (`{difId}`) ; `trigram:` le surcharge, `trigram: ""` le retire.
 - `returns` en composition exige `name` (inutilisé) et `comment`, comme toute composition.
 - Un fichier client ou serveur généré par fichier de modèle contenant des endpoints (`options.endpoints.fileName` / `prefix`) ; noms d'endpoints uniques par fichier cible. Des fichiers du même module au même nom sont fusionnés et doivent avoir le même `prefix`.
-
-## Code généré
-
-- Fichier partiellement généré (ex. contrôleur) : des imports peuvent rester à compléter à la main.

@@ -4,12 +4,12 @@ Index de [`SKILL.md`](../SKILL.md) : ce que le générateur fait des clés, et l
 
 **Lire un seul fichier selon le sujet :**
 
-| Sujet                                                                                                                                                        | Fichier                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| classe persistée ou DTO, `reference: true`, `enum`, `values`                                                                                                 | [`regles/classes.md`](regles/classes.md)                                 |
-| noms générés, `useClass`, `withReverse`, `multiple` ; clé primaire et surcharges d'un alias ; groupe de champs répété (composition plutôt qu'alias préfixés) | [`regles/associations-alias.md`](regles/associations-alias.md)           |
-| correspondances, listes, converters                                                                                                                          | [`regles/mappers.md`](regles/mappers.md)                                 |
-| emplacement des paramètres, corps, fichiers générés, imports à compléter                                                                                     | [`regles/endpoints.md`](regles/endpoints.md)                             |
-| visibilité d'une annotation, template ; décorateurs                                                                                                          | [`regles/annotations-decorateurs.md`](regles/annotations-decorateurs.md) |
-| `uses:`, tags et références omises, `uses:` circulaires                                                                                                      | [`regles/fichiers-uses.md`](regles/fichiers-uses.md)                     |
-| pièges sans message d'erreur clair (ordre des clés, tags)                                                                                                    | [`regles/invisibles.md`](regles/invisibles.md)                           |
+| Sujet | Fichier |
+| --- | --- |
+| classe persistée ou DTO, `reference: true`, `enum`, `values` | [`regles/classes.md`](regles/classes.md) |
+| noms générés, `useClass`, `withReverse`, `multiple` ; clé primaire et surcharges d'un alias ; groupe de champs répété (composition plutôt qu'alias préfixés) | [`regles/associations-alias.md`](regles/associations-alias.md) |
+| correspondances, listes, converters | [`regles/mappers.md`](regles/mappers.md) |
+| emplacement des paramètres, corps, fichiers générés | [`regles/endpoints.md`](regles/endpoints.md) |
+| visibilité d'une annotation, template ; décorateurs | [`regles/annotations-decorateurs.md`](regles/annotations-decorateurs.md) |
+| `uses:`, tags et références omises, `uses:` circulaires | [`regles/fichiers-uses.md`](regles/fichiers-uses.md) |
+| pièges sans message d'erreur clair (ordre des clés, tags) | [`regles/invisibles.md`](regles/invisibles.md) |

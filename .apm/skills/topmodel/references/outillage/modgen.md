@@ -4,13 +4,13 @@ Référence de [`SKILL.md`](../../SKILL.md) : mode watch, version de l'outil, d�
 
 ## Sommaire
 
-| Besoin                                   | Section                                                   |
-| ---------------------------------------- | --------------------------------------------------------- |
-| itérer vite sur le modèle                | [Mode watch](#mode-watch-sur-accord-explicite-de-lhumain) |
-| `FileNotFoundException`, version du lock | [Version de `modgen`](#version-de-modgen)                 |
-| dump `oneOf`, codes `TMDxxxx`            | [Décoder les erreurs](#décoder-les-erreurs)               |
-| options spécifiques de `modgen`          | [Options](#options)                                       |
-| code généré faux, modèle valide          | [Bug du générateur](#bug-du-générateur)                   |
+| Besoin | Section |
+| --- | --- |
+| itérer vite sur le modèle | [Mode watch](#mode-watch-sur-accord-explicite-de-lhumain) |
+| `FileNotFoundException`, version du lock | [Version de `modgen`](#version-de-modgen) |
+| dump `oneOf`, codes `TMDxxxx` | [Décoder les erreurs](#décoder-les-erreurs) |
+| options spécifiques de `modgen` | [Options](#options) |
+| code généré faux, modèle valide | [Bug du générateur](#bug-du-générateur) |
 
 Quel outil voit quelle erreur (`modgen` ou `modls`) : [`modls.md`](modls.md) § Qui attrape quoi.
 
@@ -32,7 +32,7 @@ Boucle plus rapide que la copie temporaire : le modèle n'est chargé qu'une foi
 - La version installée doit être **celle du lock** (`version:` de `topmodel.lock`). Sinon, avertissement `Ce modèle a été généré pour la dernière fois avec TopModel.Generator vX, qui n'est pas la version actuellement installée (vY)`, et `modgen` **réécrit la `version:` du lock** avec la sienne. Selon l'écart :
   - `modgen` plus récent : pas d'erreur, seul le lock change (à annuler ou signaler, [`SKILL.md`](../../SKILL.md) § Relecture) ;
   - `modgen` plus ancien que ce qu'exigent les modules du lock : erreur `Le module '…' référence une version plus récente de TopModel…` (ou « … pas la bonne version majeure… »), ou, pour un écart de version patch seulement, `FileNotFoundException: … TopModel.Generator.Core, Version=X` au chargement du module — **ce n'est pas une erreur de modèle**.
-- Alignement : `dotnet tool update -g TopModel.Generator --version <version du lock>`, action sur le poste de l'humain : la lui demander.
+- Alignement : `dotnet tool update -g TopModel.Generator --version <version du lock>`.
   - Sans `--version`, la commande installe la dernière version, qui réécrirait la version du lock à la génération suivante.
   - Modifier le lock d'une copie ne contourne pas le problème.
 - Montée de version de `modgen` (nouvelle version dans le lock) : décision de l'humain, faite dans un changement à part.
@@ -51,34 +51,30 @@ Erreur dans le fichier ./model/Data/X.tmd :/oneOf/0:[required, Required properti
 
 Après `Erreur dans le fichier ./… :`, le validateur liste une ligne `{chemin}:{erreurs}` par échec, pour les 8 branches du document. **Ignorer les branches des autres types de documents** : 0 = entête, 1 = `annotation`, 2 = `domain`, 3 = `converter`, 4 = `decorator`, 5 = `class`, 6 = `endpoint`, 7 = `dataFlow`. Le vrai message est le chemin **le plus profond** sous la branche du document fautif, ex. pour une propriété de classe `oneOf/5/properties/class/…/items/$ref/oneOf/N` (`oneOf/4` pour un décorateur, `oneOf/6` pour les `params` / `returns` d'un endpoint) :
 
-| Fragment                                                         | Sens                                                                               |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Fragment | Sens |
+| --- | --- |
 | `additionalProperties: All values fail against the false schema` | une **clé interdite** dans cette variante de propriété — c'est presque toujours ça |
-| `required, Required properties ["x"] are not present`            | clé obligatoire manquante dans la variante visée                                   |
+| `required, Required properties ["x"] are not present` | clé obligatoire manquante dans la variante visée |
 
 Le `N` final indique la variante : 0 = propriété simple, 1 = association, 2 = alias, 3 = composition.
 
 ### Codes `TMDxxxx`
 
-Message lisible, avec fichier et position : `./model/…/X.tmd[15,26] - {TMD0004} La propriété 'Type' est introuvable sur la classe 'Partie' (…)`. Les codes `TMD1xxx` sont des avertissements (désactivables par `noWarn:` dans la config).
-
-`{TMD0011} La variable '6' est introuvable` sur un texte d'annotation contenant des accolades (quantificateur de regex `{6}`) : TopModel les lit comme une variable de template. Simple avertissement, le texte est généré tel quel ; le commenter dans le `.tmd` plutôt que réécrire la regex.
+Message lisible, avec fichier et position : `./model/…/X.tmd[15,26] - {TMD0004} La propriété 'Type' est introuvable sur la classe 'Partie' (…)`.
 
 ## Options
 
 Options communes (`-f`, `-c`, `-w`, `-p`) : [`outillage.md`](../outillage.md) § Socle commun. Spécifiques à `modgen` :
 
-| Option                       | Effet                                                                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `-e, --exclude <tag>`        | exclut des tags (répétable) ; **désactive la mise à jour du lock**, donc la suppression des fichiers générés devenus orphelins       |
-| `-u, --update <module\|all>` | met à jour les modules de génération (dernière version publiée)                                                                      |
-| `-s, --schema`               | régénère le schéma JSON de la **configuration** (`<config>.schema.json`) et le référence en tête de la config ; pas celui des `.tmd` |
-
-`-c` régénère quand même le code si le modèle est valide : [`SKILL.md`](../../SKILL.md) § `modgen --check` n'est PAS en lecture seule.
+| Option | Effet |
+| --- | --- |
+| `-e, --exclude <tag>` | exclut des tags (répétable) ; **désactive la mise à jour du lock**, donc la suppression des fichiers générés devenus orphelins |
+| `-u, --update <module\|all>` | met à jour les modules de génération (dernière version publiée) |
+| `-s, --schema` | régénère le schéma JSON de la **configuration** (`<config>.schema.json`) et le référence en tête de la config ; pas celui des `.tmd` |
 
 ## Bug du générateur
 
-Le code généré est faux alors que le modèle est valide (ne compile pas, comportement erroné). Écarter d'abord les causes connues : [`regles/endpoints.md`](../regles/endpoints.md) § Code généré et [`regles/mappers.md`](../regles/mappers.md).
+Le code généré est faux alors que le modèle est valide (ne compile pas, comportement erroné). Écarter d'abord les causes connues : [`regles/mappers.md`](../regles/mappers.md).
 
 1. Vérifier que les versions installées correspondent au lock, et qu'une version plus récente du module ne corrige pas déjà (`modgen -u <module>`).
 2. Le signaler à l'humain avec le symptôme et le fichier généré en cause ; c'est lui qui remonte le bug à l'éditeur ou décide d'attendre.

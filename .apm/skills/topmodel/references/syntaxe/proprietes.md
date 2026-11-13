@@ -25,7 +25,7 @@ className, property, annotations, excludedAnnotations, customProperties, tags
 ⚠️ **Il n'y a pas de clé `name`.** Pour nommer une association (notamment deux associations vers la même classe cible), utiliser `role:` → génère `ClasseCibleIdRole` (ou `ClasseCibleRole` si `useClass` est effectif, [`regles/associations-alias.md`](../regles/associations-alias.md) § Associations).
 
 - `property:` cible une autre propriété que la clé primaire (utile vers une classe non persistée).
-- `useClass` : `false` génère la FK sans la navigation de classe. Défaut : option `defaultAssociationUseClass` de la configuration (`false` si absente). Sans effet si l'une des deux classes n'est pas persistée ; forcé vers une classe `enum: true`.
+- `useClass` : `false` génère la FK sans la navigation de classe ; défaut et conditions : [`regles/associations-alias.md`](../regles/associations-alias.md) § Associations.
 - `withReverse: true` ou `withReverse: { className: Lignes }` (aussi `comment`, `label`, `annotations`, `excludedAnnotations`) crée la relation réciproque.
 - `multiple: true` déclare l'association comme collection (le domaine devient l'`asDomains.{as}` de la PK cible, `as` valant `list` par défaut).
 - `primaryKey: true` sur deux associations = table de jointure N-N.
@@ -65,10 +65,10 @@ Référence la **classe entière** (pas de colonne FK) : DTO imbriqué, JSON.
 
 ### association vs composition vs alias
 
-|               | Génère                                | Usage                                   |
-| ------------- | ------------------------------------- | --------------------------------------- |
-| `association` | une colonne FK vers la PK de la cible | relation persistée                      |
-| `composition` | un objet imbriqué, aucune FK          | DTO, structure JSON                     |
-| `alias`       | des propriétés locales recopiées      | DTO qui reprend des champs d'une entité |
+|  | Génère | Usage |
+| --- | --- | --- |
+| `association` | une colonne FK vers la PK de la cible | relation persistée |
+| `composition` | un objet imbriqué, aucune FK | DTO, structure JSON |
+| `alias` | des propriétés locales recopiées | DTO qui reprend des champs d'une entité |
 
 Groupe de champs répété (deux rôles d'un même concept) : [`regles/associations-alias.md`](../regles/associations-alias.md) § Composition plutôt qu'alias préfixés.

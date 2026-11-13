@@ -12,31 +12,31 @@ Référence de [`SKILL.md`](../../SKILL.md) : `tmdgen` (dotnet tool `TopModel.Mo
 
 ### Source OpenAPI (`openApi:`)
 
-| Clé                         | Rôle                                                                 |
-| --------------------------- | -------------------------------------------------------------------- |
-| `source` (obligatoire)      | spécification OpenAPI (ex. `./petstore.json`)                        |
-| `module`                    | module TopModel des classes et endpoints produits (défaut `OpenApi`) |
-| `outputDirectory`           | dossier de sortie (défaut = `module` ; `{module}` y est remplacé)    |
-| `domains`                   | correspondance type OpenAPI → domaine TopModel (`type:` / `domain:`) |
-| `include`                   | restreint les éléments repris                                        |
-| `modelTags`, `endpointTags` | tags des fichiers de classes et d'endpoints                          |
-| `modelFileName`             | nom du fichier de classes (défaut `Model`)                           |
-| `preservePropertyCasing`    | conserve la casse des propriétés (défaut `true`)                     |
-| `classPrefix`               | préfixe des noms de classes                                          |
-| `useEnumClasses`            | produit des classes `enum` pour les énumérations                     |
+| Clé | Rôle |
+| --- | --- |
+| `source` (obligatoire) | spécification OpenAPI (ex. `./petstore.json`) |
+| `module` | module TopModel des classes et endpoints produits (défaut `OpenApi`) |
+| `outputDirectory` | dossier de sortie (défaut = `module` ; `{module}` y est remplacé) |
+| `domains` | correspondance type OpenAPI → domaine TopModel (`type:` / `domain:`) |
+| `include` | restreint les éléments repris |
+| `modelTags`, `endpointTags` | tags des fichiers de classes et d'endpoints |
+| `modelFileName` | nom du fichier de classes (défaut `Model`) |
+| `preservePropertyCasing` | conserve la casse des propriétés (défaut `true`) |
+| `classPrefix` | préfixe des noms de classes |
+| `useEnumClasses` | produit des classes `enum` pour les énumérations |
 
 ### Source base de données (`database:`)
 
-| Clé                  | Rôle                                                                                                 |
-| -------------------- | ---------------------------------------------------------------------------------------------------- |
-| `source`             | connexion : `dbType` (Oracle, PostgreSQL, MySQL, MSSQL), hôte, port, base, utilisateur, mot de passe |
-| `outputDirectory`    | dossier de sortie (défaut `./`)                                                                      |
-| `domains`            | correspondance type SQL → domaine TopModel                                                           |
-| `tags`               | tags des fichiers produits                                                                           |
-| `exclude`            | tables à exclure                                                                                     |
-| `extractValues`      | tables dont le contenu est extrait en `values:`                                                      |
-| `classNameOverrides` | nom de classe imposé pour une table                                                                  |
-| `modules`            | regroupement des tables en modules (`name`, `classes`, `tags`)                                       |
+| Clé | Rôle |
+| --- | --- |
+| `source` | connexion : `dbType` (Oracle, PostgreSQL, MySQL, MSSQL), hôte, port, base, utilisateur, mot de passe |
+| `outputDirectory` | dossier de sortie (défaut `./`) |
+| `domains` | correspondance type SQL → domaine TopModel |
+| `tags` | tags des fichiers produits |
+| `exclude` | tables à exclure |
+| `extractValues` | tables dont le contenu est extrait en `values:` |
+| `classNameOverrides` | nom de classe imposé pour une table |
+| `modules` | regroupement des tables en modules (`name`, `classes`, `tags`) |
 
 Ne pas écrire de mot de passe réel dans un fichier versionné ni dans une commande rapportée à l'humain.
 
@@ -44,12 +44,6 @@ Ne pas écrire de mot de passe réel dans un fichier versionné ni dans une comm
 
 Seules les options communes existent, plus :
 
-| Option         | Effet                                                                                                         |
-| -------------- | ------------------------------------------------------------------------------------------------------------- |
+| Option | Effet |
+| --- | --- |
 | `-s, --schema` | régénère le schéma JSON de la **configuration** (`<config>.schema.json`) et le référence en tête de la config |
-
-Pas de `-e` ni de `-u` (propres à `modgen`, [`modgen.md`](modgen.md) § Options).
-
-## Version
-
-Package `TopModel.ModelGenerator`. Au démarrage, l'outil signale si une version plus récente est publiée (comme `modgen`) : ne pas mettre à jour sans l'humain, `dotnet tool update -g TopModel.ModelGenerator --version <version>` se fait sur son poste.

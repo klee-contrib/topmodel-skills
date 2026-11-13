@@ -21,7 +21,6 @@ Référence de [`SKILL.md`](../../SKILL.md). Clés autorisées : [`syntaxe/propr
 - Les `tags` de propriété ne sont pas hérités par les alias.
 - Une surcharge (`required`, `label`, `defaultValue`…) s'applique à **toutes** les propriétés incluses : des surcharges différentes demandent des alias séparés.
 - L'alias d'une classe qui a des associations réciproques recopie aussi ces propriétés réciproques : les `exclude` si le DTO n'en veut pas. Sur une classe persistée, un alias d'une propriété `multiple` est refusé (`TMD9012`).
-- `include` / `exclude` / `property` désignent les propriétés par leur **nom généré** (§ Associations pour une association), sinon `TMD0004`.
 
 ## Composition plutôt qu'alias préfixés
 

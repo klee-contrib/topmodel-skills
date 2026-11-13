@@ -4,12 +4,12 @@ Index de [`SKILL.md`](../SKILL.md). Distillé du schéma JSON faisant autorité,
 
 Les listes de clés sont **fermées** : une clé non listée fait échouer la validation avec un message illisible. **Lire un seul fichier selon ce que tu écris :**
 
-| Ce que tu écris                                                                           | Fichier                                         |
-| ----------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| entête (`module`, `tags`, `uses`, `options`), `domain`, `converter`, `decorator`, `endpoint`, `dataFlow` : clés racines | [`syntaxe/fichier.md`](syntaxe/fichier.md)      |
-| une classe : clés, `reference`, `enum`, héritage, `mappers`                               | [`syntaxe/classe.md`](syntaxe/classe.md)        |
-| une propriété : simple, `association`, `alias`, `composition`                             | [`syntaxe/proprietes.md`](syntaxe/proprietes.md) |
-| une annotation (ex. regex sur un domaine)                                                 | [`syntaxe/annotations.md`](syntaxe/annotations.md) |
+| Ce que tu écris | Fichier |
+| --- | --- |
+| entête (`module`, `tags`, `uses`, `options`), `domain`, `converter`, `decorator`, `endpoint`, `dataFlow` : clés racines | [`syntaxe/fichier.md`](syntaxe/fichier.md) |
+| une classe : clés, `reference`, `enum`, héritage, `mappers` | [`syntaxe/classe.md`](syntaxe/classe.md) |
+| une propriété : simple, `association`, `alias`, `composition` | [`syntaxe/proprietes.md`](syntaxe/proprietes.md) |
+| une annotation (ex. regex sur un domaine) | [`syntaxe/annotations.md`](syntaxe/annotations.md) |
 
 Ce que le générateur fait de ces clés, et les pièges : [`regles.md`](regles.md) ; effets propres à un langage : [`generateurs.md`](generateurs.md).
 

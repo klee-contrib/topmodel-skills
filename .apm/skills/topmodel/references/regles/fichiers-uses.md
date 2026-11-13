@@ -13,10 +13,10 @@ Référence de [`SKILL.md`](../../SKILL.md). Entête d'un fichier (`uses`, `tags
 
 TopModel les **accepte** (depuis la 3.2.0) : chaque cycle de fichiers est regroupé et résolu comme un seul fichier. Aucun code d'erreur.
 
-| Situation                                       | Statut                                                                              |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Situation | Statut |
+| --- | --- |
 | `withReverse` ou `multiple` entre deux fichiers | **obligatoire** : `uses:` retour sur le fichier de la classe cible, sinon `TMD9008` |
-| autre cycle                                     | toléré ; la doc conseille de les réduire au minimum                                 |
+| autre cycle | toléré ; la doc conseille de les réduire au minimum |
 
 Conséquences d'un cycle :
 
